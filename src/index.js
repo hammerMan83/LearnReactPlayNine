@@ -29,12 +29,10 @@ const Answer = props => {
 };
 
 const Numbers = props => {
-  const arrOfNumbers = _.range(1, 10);
-
   return (
     <div className="card text-center">
       <div>
-        {arrOfNumbers.map((number, i) => (
+        {Numbers.list.map((number, i) => (
           <span key={i} className="number">
             {number}
           </span>
@@ -43,6 +41,8 @@ const Numbers = props => {
     </div>
   );
 };
+
+Numbers.list = _.range(1, 10);
 
 class Game extends React.Component {
   render() {
