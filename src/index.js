@@ -13,7 +13,7 @@ class Stars extends React.Component {
     //const numberOfStars = 1 + Math.floor(Math.random() * 9);
 
     return (
-      <div className="col-sm-5">
+      <div className="col-5">
         {_.range(this.props.numberOfStars).map(i => (
           <i key={i} className="fa fa-star" />
         ))}
@@ -23,11 +23,37 @@ class Stars extends React.Component {
 }
 
 const Button = props => {
+  let button;
+
+  console.log("answerIsCorrect: " + props.answerIsCorrect);
+
+  switch (props.answerIsCorrect) {
+    case true:
+      button = (
+        <button className="btn btn-success" onClick={props.addUsedNumber}>
+          <i className="fa fa-check" />
+        </button>
+      );
+      break;
+    case false:
+      button = (
+        <button className="btn btn-danger">
+          <i className="fa fa-times" />
+        </button>
+      );
+      break;
+    default:
+      button = (
+        <button className="btn" disabled={props.selectedNumbers.length === 0}
+                onClick={props.checkAnswer}>
+          =
+        </button>
+      );
+  }
+
   return (
-    <div className="col-sm-2">
-      <button className="btn" disabled={props.selectedNumbers.length === 0}>
-        =
-      </button>
+    <div className="col-2">
+      {button}
     </div>
   );
 };
@@ -36,7 +62,7 @@ const Answer = props => {
   let numbers = props.selectedNumbers;
 
   return (
-    <div className="col-sm-5">
+    <div className="col-5">
       {numbers.map((number, i) => (
         <span
           key={i}
@@ -51,17 +77,21 @@ const Answer = props => {
 };
 
 const Numbers = props => {
+  let numberClassName = number => {
+    if (props.usedNumbers.includes(number)) return "number used";
+
+    if (props.selectedNumbers.includes(number)) return "number selected";
+
+    return "number";
+  };
+
   return (
     <div className="card text-center">
       <div>
         {Numbers.list.map((number, i) => (
           <span
             key={i}
-            className={
-              props.selectedNumbers.includes(number)
-                ? "number selected"
-                : "number"
-            }
+            className={numberClassName(number)}
             onClick={() => props.selectNumber(number)}
           >
             {number}
@@ -77,16 +107,22 @@ Numbers.list = _.range(1, 10);
 class Game extends React.Component {
   state = {
     selectedNumbers: [],
-    randomNumberOfStars: 1 + Math.floor(Math.random() * 9)
+    randomNumberOfStars: 1 + Math.floor(Math.random() * 9),
+    answerIsCorrect: null,
+    usedNumbers: []
   };
 
   selectNumber = clickedNumber => {
-    if (this.state.selectedNumbers.indexOf(clickedNumber) >= 0) {
+    if (
+      this.state.selectedNumbers.includes(clickedNumber) ||
+      this.state.usedNumbers.includes(clickedNumber)
+    ) {
       return;
     }
 
     this.setState(prevState => ({
-      selectedNumbers: prevState.selectedNumbers.concat(clickedNumber)
+      selectedNumbers: prevState.selectedNumbers.concat(clickedNumber),
+      answerIsCorrect: null
     }));
   };
 
@@ -94,12 +130,37 @@ class Game extends React.Component {
     this.setState(prevState => ({
       selectedNumbers: prevState.selectedNumbers.filter(
         item => item !== clickedNumber
-      )
+      ),
+      answerIsCorrect: null
+    }));
+  };
+
+  checkAnswer = () => {
+    console.log('In checkAnswer method');
+    this.setState(prevState => ({
+      answerIsCorrect:
+        prevState.randomNumberOfStars ===
+        prevState.selectedNumbers.reduce((acc, n) => acc + n, 0)
+    }));
+  };
+
+  addUsedNumber = () => {
+    console.log('In addUsedNumber method');
+    this.setState(prevState => ({
+      usedNumbers: prevState.usedNumbers.concat(prevState.selectedNumbers),
+      selectedNumbers: [],
+      randomNumberOfStars: 1 + Math.floor(Math.random() * 9),
+      answerIsCorrect: null
     }));
   };
 
   render() {
-    const { selectedNumbers, randomNumberOfStars } = this.state;
+    const {
+      selectedNumbers,
+      randomNumberOfStars,
+      answerIsCorrect,
+      usedNumbers
+    } = this.state;
 
     return (
       <div className="container">
@@ -107,7 +168,12 @@ class Game extends React.Component {
         <hr />
         <div className="row">
           <Stars numberOfStars={randomNumberOfStars} />
-          <Button selectedNumbers={selectedNumbers} />
+          <Button
+            selectedNumbers={selectedNumbers}
+            checkAnswer={this.checkAnswer}
+            answerIsCorrect={answerIsCorrect}
+            addUsedNumber={this.addUsedNumber}
+          />
           <Answer
             addAnswerNumberBack={this.addAnswerNumberBack}
             selectedNumbers={selectedNumbers}
@@ -117,6 +183,7 @@ class Game extends React.Component {
         <Numbers
           selectNumber={this.selectNumber}
           selectedNumbers={selectedNumbers}
+          usedNumbers={usedNumbers}
         />
       </div>
     );

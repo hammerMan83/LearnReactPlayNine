@@ -5,7 +5,7 @@
 
 .fa-star {
   margin: 0.5em;
-  font-size: 24px;
+  font-size: 26px;
 }
 
 .number {
@@ -13,7 +13,7 @@
   margin: 0.5em;
   text-align: center;
   background-color: #ccc;
-  width: 24px;
+  width: 28px;
   border-radius: 50%;
 }
 
@@ -26,4 +26,5 @@
 .used {
   background-color: #aaddaa;
   color: #99bb99;
+  cursor: not-allowed;
 }
